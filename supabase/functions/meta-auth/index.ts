@@ -1,6 +1,24 @@
+/**
+ * Meta OAuth callback (GET ?code=&state=) has **no** Supabase JWT. The deployed function MUST run with
+ * JWT verification disabled, or the gateway rejects the request before this code runs:
+ *   supabase functions deploy meta-auth --no-verify-jwt
+ * or [functions.meta-auth] verify_jwt = false in supabase/config.toml (then deploy).
+ */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const FB_API_VERSION = "v21.0";
+
+/** Supabase / Deno may pass a path-only URL; Meta always sends full query string. */
+function getRequestUrl(req: Request): URL {
+  const raw = req.url;
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    return new URL(raw);
+  }
+  const host = req.headers.get("host") ?? req.headers.get("x-forwarded-host") ?? "";
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  if (!host) return new URL(raw, "https://placeholder.local");
+  return new URL(raw, `${proto}://${host}`);
+}
 
 function metaOAuthRedirectUri(): string {
   const explicit = Deno.env.get("META_REDIRECT_URI")?.trim();
@@ -106,6 +124,19 @@ async function fetchMetaUserId(accessToken: string): Promise<string> {
 }
 
 Deno.serve(async (req) => {
+  try {
+    return await handleMetaAuth(req);
+  } catch (e) {
+    console.error("meta-auth error:", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: "meta-auth failed", detail: msg }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+});
+
+async function handleMetaAuth(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders(req) });
   }
@@ -115,7 +146,7 @@ Deno.serve(async (req) => {
   const metaAppId = Deno.env.get("META_APP_ID") ?? Deno.env.get("FACEBOOK_APP_ID");
   const metaSecret = Deno.env.get("META_APP_SECRET") ?? Deno.env.get("FACEBOOK_APP_SECRET");
   const dashboardBase =
-    Deno.env.get("DASHBOARD_BASE_URL")?.trim().replace(/\/+$/, "") ?? "http://localhost:8080";
+    Deno.env.get("DASHBOARD_BASE_URL")?.trim().replace(/\/+$/, "") ?? "https://neo-weld.vercel.app";
 
   if (!supabaseUrl || !serviceKey) {
     return new Response(JSON.stringify({ error: "Missing Supabase configuration" }), {
@@ -180,7 +211,7 @@ Deno.serve(async (req) => {
 
   // --- GET: Meta redirects here with ?code=&state= ---
   if (req.method === "GET") {
-    const u = new URL(req.url);
+    const u = getRequestUrl(req);
     const code = u.searchParams.get("code");
     const state = u.searchParams.get("state");
     const err = u.searchParams.get("error");
@@ -273,4 +304,4 @@ Deno.serve(async (req) => {
   }
 
   return new Response("Method not allowed", { status: 405, headers: corsHeaders(req) });
-});
+}

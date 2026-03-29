@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy:meta-auth": "npx supabase@latest functions deploy meta-auth --no-verify-jwt"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
