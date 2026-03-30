@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy:meta-auth": "npx supabase@latest functions deploy meta-auth --no-verify-jwt"
+    "deploy:meta-auth": "npx supabase@latest functions deploy meta-auth --no-verify-jwt",
+    "deploy:snapchat-auth": "npx supabase@latest functions deploy snapchat-auth --no-verify-jwt",
+    "deploy:snapchat-sync": "npx supabase@latest functions deploy snapchat-sync --no-verify-jwt"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

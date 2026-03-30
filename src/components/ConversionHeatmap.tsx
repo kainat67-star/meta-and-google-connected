@@ -1,3 +1,4 @@
+import { AnimatedChartBox, AnimatedChartPlot, chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { motion } from "framer-motion";
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -30,12 +31,7 @@ function getColor(val: number) {
 
 export function ConversionHeatmap() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5 }}
-      className="glass-card p-6"
-    >
+    <AnimatedChartBox className="glass-card p-6">
       <div className="chart-header">
         <div>
           <h3 className="chart-title">Conversion Heatmap</h3>
@@ -52,6 +48,7 @@ export function ConversionHeatmap() {
         </div>
       </div>
 
+      <AnimatedChartPlot staggerAfterBox={0.42}>
       <div className="overflow-x-auto">
         <div className="min-w-[360px]">
           {/* Header row */}
@@ -70,10 +67,15 @@ export function ConversionHeatmap() {
                 const cell = heatmapData.find((d) => d.x === hi && d.y === di)!;
                 return (
                   <motion.div
-                    key={hi}
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.55 + (di * 6 + hi) * 0.015 }}
+                    key={`${day}-${hi}`}
+                    initial={{ opacity: 0, scale: 0.55 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ ...chartInViewOptions, amount: 0.15 }}
+                    transition={{
+                      duration: 0.55,
+                      delay: 0.55 + (di * 6 + hi) * 0.022,
+                      ease: chartEase,
+                    }}
                     className="flex-1 aspect-[2/1] rounded-md relative group cursor-pointer transition-all hover:scale-105"
                     style={{ backgroundColor: getColor(cell.value) }}
                   >
@@ -88,6 +90,7 @@ export function ConversionHeatmap() {
           ))}
         </div>
       </div>
-    </motion.div>
+      </AnimatedChartPlot>
+    </AnimatedChartBox>
   );
 }

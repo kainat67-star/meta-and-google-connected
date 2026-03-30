@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown, LucideIcon } from "lucide-react";
 import { useId } from "react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { AnimatedCounter } from "./AnimatedCounter";
 
 interface MetricCardProps {
@@ -33,9 +34,10 @@ export function MetricCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={chartInViewOptions}
+      transition={{ duration: 0.92, delay, ease: chartEase }}
       className="glass-card-hover p-5 relative overflow-hidden group"
     >
       {/* Ambient glow */}
@@ -64,8 +66,14 @@ export function MetricCard({
       {/* Value */}
       <AnimatedCounter value={value} className="text-[22px] font-extrabold text-foreground tracking-tight leading-none mb-3 block" />
 
-      {/* Sparkline */}
-      <div className="h-10 mb-2">
+      {/* Sparkline — second-stage plot motion + Recharts draw */}
+      <motion.div
+        className="h-10 mb-2"
+        initial={{ opacity: 0, scale: 0.92 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={chartInViewOptions}
+        transition={{ duration: 0.88, delay: delay + 0.38, ease: chartEase }}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <defs>
@@ -80,10 +88,13 @@ export function MetricCard({
               stroke={`url(#spark-${gradId})`}
               strokeWidth={2}
               dot={false}
+              isAnimationActive
+              animationBegin={420}
+              animationDuration={1300}
             />
           </LineChart>
         </ResponsiveContainer>
-      </div>
+      </motion.div>
 
       {/* Comparison */}
       <p className="text-[10px] text-muted-foreground/70">{comparison}</p>

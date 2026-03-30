@@ -1,3 +1,4 @@
+import { chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { platformColorByLabel } from "@/lib/platforms";
 import { motion, AnimatePresence } from "framer-motion";
@@ -378,7 +379,13 @@ const Campaigns = () => {
                       <td className="px-4 py-3 tabular-nums text-muted-foreground">{c.ctr.toFixed(2)}%</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-14 h-7 shrink-0">
+                          <motion.div
+                            className="w-14 h-7 shrink-0"
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={chartInViewOptions}
+                            transition={{ duration: 0.75, delay: i * 0.05, ease: chartEase }}
+                          >
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={sparkData}>
                                 <Line
@@ -387,10 +394,13 @@ const Campaigns = () => {
                                   stroke={c.trend >= 0 ? "#10b981" : "#ef4444"}
                                   strokeWidth={1.5}
                                   dot={false}
+                                  isAnimationActive
+                                  animationBegin={280}
+                                  animationDuration={1100}
                                 />
                               </LineChart>
                             </ResponsiveContainer>
-                          </div>
+                          </motion.div>
                           <span
                             className={cn(
                               "inline-flex items-center gap-0.5 text-[11px] font-bold tabular-nums",

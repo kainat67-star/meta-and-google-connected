@@ -1,3 +1,11 @@
 # Meta OAuth callback is a browser redirect from Meta (GET ?code=&state=) — no Supabase JWT on that request.
 [functions.meta-auth]
 verify_jwt = false
+
+# Snapchat OAuth callback (GET ?code=&state=) — no Supabase JWT on that request.
+[functions.snapchat-auth]
+verify_jwt = false
+
+# Cron / server-triggered sync; no end-user JWT (optional SNAPCHAT_SYNC_SECRET in Authorization).
+[functions.snapchat-sync]
+verify_jwt = false

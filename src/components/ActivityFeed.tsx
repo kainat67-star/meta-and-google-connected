@@ -1,3 +1,4 @@
+import { chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, AlertTriangle, Zap, Bell } from "lucide-react";
 
@@ -13,9 +14,10 @@ const activities = [
 export function ActivityFeed() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.6 }}
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={chartInViewOptions}
+      transition={{ duration: 0.92, ease: chartEase }}
       className="glass-card p-6"
     >
       <div className="chart-header">
@@ -33,9 +35,10 @@ export function ActivityFeed() {
         {activities.map((a, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.65 + i * 0.06 }}
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={chartInViewOptions}
+            transition={{ duration: 0.75, delay: 0.35 + i * 0.07, ease: chartEase }}
             className="flex items-start gap-3 py-3 relative"
           >
             {/* Timeline line */}

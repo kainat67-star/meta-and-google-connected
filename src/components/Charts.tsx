@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
+import { AnimatedChartBox, AnimatedChartPlot } from "@/components/AnimatedChartShell";
 
 const spendData = [
   { name: "Jan", google: 4200, meta: 3800, tiktok: 2400, snap: 1200, x: 800 },
@@ -53,12 +53,7 @@ const chartCard = "glass-card p-6";
 
 export function SpendOverTimeChart() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className={chartCard}
-    >
+    <AnimatedChartBox className={chartCard}>
       <div className="chart-header">
         <div>
           <h3 className="chart-title">Ad Spend Over Time</h3>
@@ -73,6 +68,7 @@ export function SpendOverTimeChart() {
           ))}
         </div>
       </div>
+      <AnimatedChartPlot>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={spendData}>
           <defs>
@@ -93,29 +89,59 @@ export function SpendOverTimeChart() {
           <XAxis dataKey="name" stroke={axisStroke} fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke={axisStroke} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
           <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="google" stroke="#4285f4" fill="url(#gGoogle)" strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-          <Area type="monotone" dataKey="meta" stroke="#1877f2" fill="url(#gMeta)" strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-          <Area type="monotone" dataKey="tiktok" stroke="#fe2c55" fill="url(#gTiktok)" strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+          <Area
+            type="monotone"
+            dataKey="google"
+            stroke="#4285f4"
+            fill="url(#gGoogle)"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 0 }}
+            isAnimationActive
+            animationBegin={400}
+            animationDuration={1400}
+          />
+          <Area
+            type="monotone"
+            dataKey="meta"
+            stroke="#1877f2"
+            fill="url(#gMeta)"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 0 }}
+            isAnimationActive
+            animationBegin={520}
+            animationDuration={1400}
+          />
+          <Area
+            type="monotone"
+            dataKey="tiktok"
+            stroke="#fe2c55"
+            fill="url(#gTiktok)"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 0 }}
+            isAnimationActive
+            animationBegin={640}
+            animationDuration={1400}
+          />
         </AreaChart>
       </ResponsiveContainer>
-    </motion.div>
+      </AnimatedChartPlot>
+    </AnimatedChartBox>
   );
 }
 
 export function ChannelBarChart() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-      className={chartCard}
-    >
+    <AnimatedChartBox className={chartCard}>
       <div className="chart-header">
         <div>
           <h3 className="chart-title">ROAS by Channel</h3>
           <p className="chart-subtitle">Return on ad spend per platform</p>
         </div>
       </div>
+      <AnimatedChartPlot>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={channelData} barSize={32}>
           <defs>
@@ -128,57 +154,63 @@ export function ChannelBarChart() {
           <XAxis dataKey="name" stroke={axisStroke} fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke={axisStroke} fontSize={11} tickLine={false} axisLine={false} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="roas" fill="url(#roasGrad)" radius={[8, 8, 0, 0]} animationBegin={200} animationDuration={800} />
+          <Bar
+            dataKey="roas"
+            fill="url(#roasGrad)"
+            radius={[8, 8, 0, 0]}
+            isAnimationActive
+            animationBegin={450}
+            animationDuration={1200}
+          />
         </BarChart>
       </ResponsiveContainer>
-    </motion.div>
+      </AnimatedChartPlot>
+    </AnimatedChartBox>
   );
 }
 
 export function SpendDistributionPie() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.4 }}
-      className={chartCard}
-    >
+    <AnimatedChartBox className={chartCard}>
       <div className="chart-header">
         <div>
           <h3 className="chart-title">Spend Distribution</h3>
           <p className="chart-subtitle">Budget allocation by platform</p>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={pieData}
-            cx="50%"
-            cy="50%"
-            innerRadius={65}
-            outerRadius={105}
-            paddingAngle={3}
-            dataKey="value"
-            animationBegin={300}
-            animationDuration={800}
-          >
-            {pieData.map((entry, index) => (
-              <Cell key={index} fill={entry.color} stroke="transparent" />
-            ))}
-          </Pie>
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 justify-center">
-        {pieData.map((d) => (
-          <div key={d.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <div className="w-2.5 h-2.5 rounded-[4px]" style={{ backgroundColor: d.color }} />
-            <span className="font-medium">{d.name}</span>
-            <span className="text-muted-foreground/50">{d.value}%</span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
+      <AnimatedChartPlot>
+        <ResponsiveContainer width="100%" height={280}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={65}
+              outerRadius={105}
+              paddingAngle={3}
+              dataKey="value"
+              isAnimationActive
+              animationBegin={480}
+              animationDuration={1200}
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={index} fill={entry.color} stroke="transparent" />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 justify-center">
+          {pieData.map((d) => (
+            <div key={d.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <div className="w-2.5 h-2.5 rounded-[4px]" style={{ backgroundColor: d.color }} />
+              <span className="font-medium">{d.name}</span>
+              <span className="text-muted-foreground/50">{d.value}%</span>
+            </div>
+          ))}
+        </div>
+      </AnimatedChartPlot>
+    </AnimatedChartBox>
   );
 }
 

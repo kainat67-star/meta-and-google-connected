@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { describeFunctionsInvokeError } from "@/lib/edge-function-errors";
 import { supabase } from "@/lib/supabase";
 import { getMetaOAuthRedirectUri } from "@/lib/meta-oauth";
+import { getSnapchatOAuthRedirectUri } from "@/lib/snapchat-oauth";
 
 /* ─── Platform Data ─── */
 const platforms = [
@@ -104,9 +105,11 @@ const Settings = () => {
   const [currency, setCurrency] = useState("USD ($)");
   const [timezone, setTimezone] = useState("America/New_York (EST)");
   const [metaConnecting, setMetaConnecting] = useState(false);
+  const [snapConnecting, setSnapConnecting] = useState(false);
   const darkMode = resolvedTheme === "dark";
 
   const metaRedirectUri = getMetaOAuthRedirectUri();
+  const snapRedirectUri = getSnapchatOAuthRedirectUri();
 
   useEffect(() => {
     if (searchParams.get("meta_connected") === "1") {
@@ -119,6 +122,18 @@ const Settings = () => {
     if (err) {
       toast.error("Meta connection failed", { description: decodeURIComponent(err) });
       searchParams.delete("meta_error");
+      setSearchParams(searchParams, { replace: true });
+    }
+    if (searchParams.get("snapchat_connected") === "1") {
+      toast.success("Snapchat Ads connected", { description: "Your account token was saved." });
+      setConnections((prev) => prev.map((p) => (p.id === "snap" ? { ...p, connected: true, account: "Connected" } : p)));
+      searchParams.delete("snapchat_connected");
+      setSearchParams(searchParams, { replace: true });
+    }
+    const snapErr = searchParams.get("snapchat_error");
+    if (snapErr) {
+      toast.error("Snapchat connection failed", { description: decodeURIComponent(snapErr) });
+      searchParams.delete("snapchat_error");
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -158,6 +173,41 @@ const Settings = () => {
     }
   };
 
+  const connectSnapchatAds = async () => {
+    setSnapConnecting(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+      if (!session) {
+        toast.error("Sign in required", {
+          description: "Log in with Supabase Auth first, then connect Snapchat Ads.",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("snapchat-auth", {
+        method: "POST",
+        body: {},
+      });
+
+      if (error) {
+        const description = await describeFunctionsInvokeError(error);
+        toast.error("Could not start Snapchat OAuth", { description });
+        return;
+      }
+
+      const url = (data as { url?: string })?.url;
+      if (!url) {
+        toast.error("Invalid response from snapchat-auth", { description: "Missing OAuth URL." });
+        return;
+      }
+
+      window.location.assign(url);
+    } finally {
+      setSnapConnecting(false);
+    }
+  };
+
   const toggleConnection = (id: string) => {
     setConnections((prev) => prev.map((p) => p.id === id ? { ...p, connected: !p.connected } : p));
   };
@@ -165,6 +215,10 @@ const Settings = () => {
   const onIntegrationClick = (id: string, connected: boolean) => {
     if (id === "meta" && !connected) {
       void connectMetaAds();
+      return;
+    }
+    if (id === "snap" && !connected) {
+      void connectSnapchatAds();
       return;
     }
     toggleConnection(id);
@@ -189,6 +243,11 @@ const Settings = () => {
                       OAuth redirect_uri: {metaRedirectUri}
                     </p>
                   )}
+                  {p.id === "snap" && !p.connected && (
+                    <p className="text-[10px] text-muted-foreground/90 mt-1 break-all font-mono leading-snug">
+                      OAuth redirect_uri: {snapRedirectUri}
+                    </p>
+                  )}
                   {p.connected ? (
                     <p className="text-xs text-muted-foreground flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> Connected{p.account ? ` · ${p.account}` : ""}</p>
                   ) : (
@@ -197,7 +256,7 @@ const Settings = () => {
                 </div>
                 <button
                   type="button"
-                  disabled={p.id === "meta" && metaConnecting}
+                  disabled={(p.id === "meta" && metaConnecting) || (p.id === "snap" && snapConnecting)}
                   onClick={() => onIntegrationClick(p.id, p.connected)}
                   className={`text-xs font-medium px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-60 ${
                     p.connected
@@ -205,7 +264,7 @@ const Settings = () => {
                       : "bg-primary/10 text-primary hover:bg-primary/20"
                   }`}
                 >
-                  {p.id === "meta" && metaConnecting ? (
+                  {(p.id === "meta" && metaConnecting) || (p.id === "snap" && snapConnecting) ? (
                     <>
                       <Loader2 className="w-3 h-3 animate-spin" /> Redirecting…
                     </>
@@ -216,6 +275,10 @@ const Settings = () => {
                   ) : p.id === "meta" ? (
                     <>
                       <Link2 className="w-3 h-3" /> Connect Meta Ads
+                    </>
+                  ) : p.id === "snap" ? (
+                    <>
+                      <Link2 className="w-3 h-3" /> Connect Snapchat Ads
                     </>
                   ) : (
                     <>

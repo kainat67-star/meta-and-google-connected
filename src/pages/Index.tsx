@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { MetricCard, MetricCardSkeleton } from "@/components/MetricCard";
+import { AnimatedChartBox, AnimatedChartPlot, chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { SpendOverTimeChart, ChannelBarChart, SpendDistributionPie, ChartSkeleton } from "@/components/Charts";
 import { PerformanceTimeline } from "@/components/PerformanceTimeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
@@ -105,12 +106,7 @@ const Dashboard = () => {
           <h2 id="dash-top-campaigns-heading" className="sr-only">
             Top campaigns
           </h2>
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: loading ? 0 : 0.45 }}
-            className="glass-card-hover p-6"
-          >
+          <AnimatedChartBox className="glass-card-hover p-6">
             <div className="chart-header">
               <div>
                 <h3 className="chart-title">Top campaigns</h3>
@@ -124,13 +120,15 @@ const Dashboard = () => {
               </button>
             </div>
 
+            <AnimatedChartPlot staggerAfterBox={0.4}>
             <div className="space-y-2">
               {topCampaigns.map((campaign, i) => (
                 <motion.div
                   key={campaign.name}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: loading ? 0 : 0.55 + i * 0.05 }}
+                  initial={{ opacity: 0, x: -14 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={chartInViewOptions}
+                  transition={{ duration: 0.82, delay: i * 0.08, ease: chartEase }}
                   className="flex items-center justify-between p-4 rounded-xl bg-accent/15 hover:bg-accent/30 transition-all duration-200 cursor-pointer group border border-transparent hover:border-border/60"
                 >
                   <div className="flex-1 min-w-0">
@@ -147,7 +145,8 @@ const Dashboard = () => {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+            </AnimatedChartPlot>
+          </AnimatedChartBox>
         </section>
 
         {/* 5. Supporting detail — allocation, timing patterns, recent activity */}

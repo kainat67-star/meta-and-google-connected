@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatedChartBox, AnimatedChartPlot } from "@/components/AnimatedChartShell";
 import { useMemo, useState } from "react";
 import {
   Area,
@@ -86,12 +86,7 @@ export function PerformanceTimeline() {
   const data = useMemo(() => fullSeries.slice(0, sliceLen), [sliceLen]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.25 }}
-      className="glass-card p-6"
-    >
+    <AnimatedChartBox className="glass-card p-6">
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-5">
         <div>
           <h3 className="chart-title text-base">Performance Timeline</h3>
@@ -135,6 +130,7 @@ export function PerformanceTimeline() {
         </div>
       </div>
 
+      <AnimatedChartPlot>
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
           <defs>
@@ -180,7 +176,8 @@ export function PerformanceTimeline() {
                 stroke="transparent"
                 fill={`url(#area-${m.key})`}
                 fillOpacity={1}
-                animationDuration={900}
+                animationDuration={1300}
+                animationBegin={metrics.findIndex((x) => x.key === m.key) * 150}
                 isAnimationActive
               />
             );
@@ -199,7 +196,9 @@ export function PerformanceTimeline() {
                 strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 5, strokeWidth: 2, stroke: m.color, fill: "hsl(var(--background))" }}
-                animationDuration={900}
+                animationDuration={1300}
+                animationBegin={metrics.findIndex((x) => x.key === m.key) * 150 + 100}
+                isAnimationActive
               />
             );
           })}
@@ -213,6 +212,7 @@ export function PerformanceTimeline() {
           />
         </ComposedChart>
       </ResponsiveContainer>
-    </motion.div>
+      </AnimatedChartPlot>
+    </AnimatedChartBox>
   );
 }

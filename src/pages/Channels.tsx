@@ -1,3 +1,4 @@
+import { AnimatedChartBox, AnimatedChartPlot, chartEase, chartInViewOptions } from "@/components/AnimatedChartShell";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { motion } from "framer-motion";
 import {
@@ -110,14 +111,10 @@ const Channels = () => {
   return (
     <DashboardLayout>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-          className="glass-card p-6"
-        >
+        <AnimatedChartBox className="glass-card p-6">
           <h3 className="text-sm font-semibold text-foreground mb-0.5">Budget allocation</h3>
           <p className="text-xs text-muted-foreground mb-4">Share of spend by platform · Total ${total.toLocaleString()}</p>
+          <AnimatedChartPlot staggerAfterBox={0.22}>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <defs>
@@ -136,8 +133,9 @@ const Channels = () => {
                 outerRadius={108}
                 paddingAngle={4}
                 dataKey="value"
-                animationBegin={180}
-                animationDuration={900}
+                isAnimationActive
+                animationBegin={320}
+                animationDuration={1200}
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape as never}
                 onMouseEnter={(_, i) => setActiveIndex(i)}
@@ -150,21 +148,18 @@ const Channels = () => {
               <Tooltip content={<CustomPieTooltip />} />
             </PieChart>
           </ResponsiveContainer>
+          </AnimatedChartPlot>
           <div className="flex flex-wrap gap-x-5 gap-y-3 mt-2 justify-center">
             {platforms.map((p) => (
               <PlatformLegendBadge key={p.name} color={p.color} short={p.short} full={p.name} />
             ))}
           </div>
-        </motion.div>
+        </AnimatedChartBox>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14 }}
-          className="glass-card p-6"
-        >
+        <AnimatedChartBox className="glass-card p-6">
           <h3 className="text-sm font-semibold text-foreground mb-0.5">Spend vs revenue</h3>
           <p className="text-xs text-muted-foreground mb-4">Grouped comparison by platform</p>
+          <AnimatedChartPlot staggerAfterBox={0.26}>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={barData} barGap={6}>
               <defs>
@@ -185,17 +180,33 @@ const Channels = () => {
                 wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
                 formatter={(v) => <span className="text-muted-foreground">{v}</span>}
               />
-              <Bar dataKey="Spend" fill="url(#bar-spend)" radius={[6, 6, 0, 0]} animationBegin={200} animationDuration={800} />
-              <Bar dataKey="Revenue" fill="url(#bar-rev)" radius={[6, 6, 0, 0]} animationBegin={350} animationDuration={800} />
+              <Bar
+                dataKey="Spend"
+                fill="url(#bar-spend)"
+                radius={[6, 6, 0, 0]}
+                isAnimationActive
+                animationBegin={380}
+                animationDuration={1150}
+              />
+              <Bar
+                dataKey="Revenue"
+                fill="url(#bar-rev)"
+                radius={[6, 6, 0, 0]}
+                isAnimationActive
+                animationBegin={460}
+                animationDuration={1150}
+              />
             </BarChart>
           </ResponsiveContainer>
-        </motion.div>
+          </AnimatedChartPlot>
+        </AnimatedChartBox>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={chartInViewOptions}
+        transition={{ duration: 0.92, ease: chartEase }}
         className="glass-card overflow-hidden"
       >
         <div className="px-5 py-4 border-b border-border/80">
@@ -217,9 +228,10 @@ const Channels = () => {
               {platforms.map((p, i) => (
                 <motion.tr
                   key={p.name}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.22 + i * 0.04 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={chartInViewOptions}
+                  transition={{ duration: 0.72, delay: 0.28 + i * 0.06, ease: chartEase }}
                   className="border-b border-border/50 hover:bg-accent/20 transition-colors"
                 >
                   <td className="px-5 py-3">
